@@ -1,6 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 from bson import ObjectId
 from Database.mongodb import product_collection
 
@@ -17,13 +17,36 @@ class Product(BaseModel):
     sizes: List[Size]
 
 # GET all products
-@router.get("/getproducts", response_model=List[Product])
-def get_products():
-    products = list(product_collection.find())
-    #Iterating through each MongoDB document in the products list
+@router.get("/getproducts")
+def get_products(
+    name: Optional[str] = Query(None),
+    size: Optional[str] = Query(None),
+    limit: int = Query(10),
+    offset: int = Query(0)):
+    query = {}
+    
+    # If name is provided then search products with name
+    if name:
+        query["name"] = {"$regex": name, "$options": "i"}
+
+    # If size is provided then match products having that size in sizes array.
+    if size:
+        query["sizes.size"] = size
+
+    # Perform query with pagination
+    products = list(
+        product_collection
+        .find(query)
+        .sort("_id")
+        .skip(offset)
+        .limit(limit)
+    )
+
+
+    # Convert ObjectId to string
     for product in products:
-        product["_id"] = str(product["_id"])  # Convert ObjectId to string as fastapi can't encode ObjectId
-        # ObjectId is not a valid JSON type — it's a MongoDB/BSON-specific type.
+        product["_id"] = str(product["_id"])
+
     return products
 
 # Create product endpoint
