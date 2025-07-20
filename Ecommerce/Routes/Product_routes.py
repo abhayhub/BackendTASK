@@ -29,6 +29,14 @@ def get_products():
 # Create product endpoint
 @router.post("/products")
 def create_product(product: Product):
+
+     # Check if a product with the same name already exists or not so that we can only store unique products
+    existing_product = product_collection.find_one({ "name": product.name })
+    
+    #if exist then throw a exception
+    if existing_product:
+        raise HTTPException(status_code=400, detail="Product with this name already exists.")
+
     product_detail = product.dict()
     result = product_collection.insert_one(product_detail)
 
