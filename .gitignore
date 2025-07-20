@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# FastAPI / Pydantic cache
+*.db
+*.sqlite3
+*.log
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+.ENV/
+*.env
+
+# VSCode
+.vscode/
+
+# macOS
+.DS_Store
+
+# PyCharm
+.idea/
+
+# Migrations / compiled files
+*.egg-info/
+.eggs/
+
+# Test cache
+.pytest_cache/
+.coverage
+
+# Bytecode
+*.bak
+*.swp
+
+# dotenv files
+.env
+.env.*
+
+# Mongo dump files
+dump/
