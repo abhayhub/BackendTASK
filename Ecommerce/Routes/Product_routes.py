@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List
 from bson import ObjectId
@@ -17,9 +17,23 @@ class Product(BaseModel):
     sizes: List[Size]
 
 # GET all products
-@router.get("/products", response_model=List[Product])
+@router.get("/getproducts", response_model=List[Product])
 def get_products():
     products = list(product_collection.find())
+    #Iterating through each MongoDB document in the products list
     for product in products:
-        product["_id"] = str(product["_id"])  # Convert ObjectId to string
+        product["_id"] = str(product["_id"])  # Convert ObjectId to string as fastapi can't encode ObjectId
+        # ObjectId is not a valid JSON type — it's a MongoDB/BSON-specific type.
     return products
+
+# Create product endpoint
+@router.post("/products")
+def create_product(product: Product):
+    product_detail = product.dict()
+    result = product_collection.insert_one(product_detail)
+
+    if result.inserted_id:
+        return { "message": "Product added", "id": str(result.inserted_id) }
+    else:
+        raise HTTPException(status_code=500, detail="Product could not be added")
+
